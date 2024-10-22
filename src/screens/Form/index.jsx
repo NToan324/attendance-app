@@ -5,11 +5,13 @@ import { v4 } from "uuid";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import ReactLoading from "react-loading";
 
 import Location from "./location";
 import Camera from "./camera";
 import formService from "../../service/form/formService";
 import { imageDb } from "../../service/firebase/config";
+import { list } from "../../components/Loader/generic";
 
 import { Form, ButtonToolbar, Button } from "rsuite";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
@@ -17,8 +19,9 @@ import CameraAltIcon from "@mui/icons-material/CameraAlt";
 export default function FormScreen() {
   const [showCamera, setShowCamera] = useState(false);
   const [cameraPermission, setCameraPermission] = useState(false);
-  const [locationPermission, setLocationPermission] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const [infoUser, setInfoUser] = useState({
     fullName: "",
     studentCode: "",
@@ -64,8 +67,13 @@ export default function FormScreen() {
       { key: "fullName", value: "Họ và tên" },
       { key: "studentCode", value: "Mã số sinh viên" },
       { key: "code", value: "Mã điểm danh" },
+      { key: "location", value: "Vị trí" },
     ];
     for (const key in infoUser) {
+      if (key === "location" && infoUser[key].length === 0) {
+        toast.error("Vui lòng bật vị trí trước khi gửi");
+        return true;
+      }
       if (!infoUser[key]) {
         toast.error(
           `${listKey.find((item) => item.key === key).value} đang được bỏ trống`
@@ -85,9 +93,11 @@ export default function FormScreen() {
           toast.error("Vui lòng chụp hình trước khi gửi");
           return;
         }
+        setLoading(true);
         const result = await formService(updateInfo);
-        if (result.data.errCode === 0) navigate("/form-sucess");
-        else toast.error("Điểm danh thất bại");
+        if (result.data.errCode === 0) {
+          navigate("/form-sucess");
+        } else toast.error("Điểm danh thất bại");
       }
     } catch (error) {
       throw new Error(error);
@@ -115,21 +125,10 @@ export default function FormScreen() {
       } catch (error) {
         setCameraPermission(false);
       }
-      try {
-        const locationPermission = await navigator.permissions.query({
-          name: "geolocation",
-        });
-        if (locationPermission.state === "granted") {
-          setLocationPermission(true);
-        } else {
-          setLocationPermission(false);
-        }
-      } catch (error) {
-        setLocationPermission(false);
-      }
     }
     checkPermissionCamera();
   }, []);
+
   return (
     <div className="bg-white p-10 w-1/2 min-w-96 h-fit my-10">
       <div className="title border-b pb-10 custom-border-color">
@@ -186,20 +185,28 @@ export default function FormScreen() {
           <Location data={getLocationData} />
         </Form.Group>
         <Form.Group className="flex justify-center flex-wrap content-center border-t mt-5 p-10 custom-border-color">
-          <ButtonToolbar>
-            <Button
-              size="lg"
-              style={{
-                backgroundColor: "#18bd5b",
-                color: "white",
-                width: "140px",
-                padding: "10px 15px",
-              }}
-              onClick={() => hanldeSubmit()}
-            >
-              Gửi
-            </Button>
-          </ButtonToolbar>
+          {!loading ?
+            <ButtonToolbar>
+              <Button
+                size="lg"
+                style={{
+                  backgroundColor: "#18bd5b",
+                  color: "white",
+                  width: "140px",
+                  padding: "10px 15px",
+                }}
+                onClick={() => hanldeSubmit()}
+              >
+                Gửi
+              </Button>
+            </ButtonToolbar>
+          : <ReactLoading
+              type={list.prop}
+              color="#000"
+              height={50}
+              width={50}
+            />
+          }
         </Form.Group>
       </Form>
     </div>
