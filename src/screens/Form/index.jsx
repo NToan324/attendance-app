@@ -12,16 +12,17 @@ import Camera from "./camera";
 import formService from "../../service/form/formService";
 import { imageDb } from "../../service/firebase/config";
 import { list } from "../../components/Loader/generic";
+import googleSheetService from "../../service/googleSheet/googleSheet";
 
 import { Form, ButtonToolbar, Button } from "rsuite";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 
 export default function FormScreen() {
+  //State
   const [showCamera, setShowCamera] = useState(false);
   const [cameraPermission, setCameraPermission] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [infoUser, setInfoUser] = useState({
     fullName: "",
     studentCode: "",
@@ -34,6 +35,7 @@ export default function FormScreen() {
     setShowCamera(true);
   };
 
+  //get image from camera and upload to firebase
   const handleUploadImageFirebase = async () => {
     try {
       const imgRef = ref(imageDb, `image/${v4()}`);
@@ -54,6 +56,7 @@ export default function FormScreen() {
     }
   };
 
+  //get data from input
   const getDataFromInput = (_, e) => {
     const { name, value } = e.target;
     setInfoUser({
@@ -62,6 +65,7 @@ export default function FormScreen() {
     });
   };
 
+  //check input is emty
   const checkIsEmty = () => {
     const listKey = [
       { key: "fullName", value: "Họ và tên" },
@@ -84,6 +88,7 @@ export default function FormScreen() {
     return false;
   };
 
+  //submit form
   const hanldeSubmit = async () => {
     try {
       const updateInfo = await handleUploadImageFirebase();
@@ -93,9 +98,25 @@ export default function FormScreen() {
           toast.error("Vui lòng chụp hình trước khi gửi");
           return;
         }
+        const data = {
+          fullName: updateInfo.fullName,
+          studentCode: updateInfo.studentCode,
+          code: updateInfo.code,
+          imageUrl: updateInfo.imageUrl,
+          location: updateInfo.location,
+        };
+
         setLoading(true);
-        const result = await formService(updateInfo);
+        await googleSheetService(data);
+        const result = await formService(data);
         if (result.data.errCode === 0) {
+          setInfoUser({
+            fullName: "",
+            studentCode: "",
+            code: "",
+            location: [],
+          });
+          setLoading(false);
           navigate("/form-sucess");
         } else toast.error("Điểm danh thất bại");
       }
@@ -104,10 +125,12 @@ export default function FormScreen() {
     }
   };
 
+  //get url image from camera
   const getUrlImageFromCamera = async (url) => {
     setImageUrl(url);
   };
 
+  //get location
   const getLocationData = async (location) => {
     setInfoUser({
       ...infoUser,
@@ -115,6 +138,7 @@ export default function FormScreen() {
     });
   };
 
+  //check permission camera
   useEffect(() => {
     async function checkPermissionCamera() {
       try {
