@@ -76,12 +76,14 @@ export default function FormScreen() {
     for (const key in infoUser) {
       if (key === "location" && infoUser[key].length === 0) {
         toast.error("Vui lòng bật vị trí trước khi gửi");
+        setLoading(false);
         return true;
       }
       if (!infoUser[key]) {
         toast.error(
           `${listKey.find((item) => item.key === key).value} đang được bỏ trống`
         );
+        setLoading(false);
         return true;
       }
     }
@@ -91,14 +93,15 @@ export default function FormScreen() {
   //submit form
   const hanldeSubmit = async () => {
     try {
+      setLoading(true);
       const updateInfo = await handleUploadImageFirebase();
       const isEmty = checkIsEmty();
       if (!isEmty) {
         if (updateInfo.imageUrl === "") {
           toast.error("Vui lòng chụp hình trước khi gửi");
+          setLoading(false);
           return;
         }
-        setLoading(true);
         const data = {
           fullName: updateInfo.fullName,
           studentCode: updateInfo.studentCode,
