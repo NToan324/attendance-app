@@ -98,15 +98,14 @@ export default function FormScreen() {
           toast.error("Vui lòng chụp hình trước khi gửi");
           return;
         }
+        setLoading(true);
         const data = {
           fullName: updateInfo.fullName,
           studentCode: updateInfo.studentCode,
           code: updateInfo.code,
-          imageUrl: updateInfo.imageUrl,
           location: updateInfo.location,
+          imageUrl: updateInfo.imageUrl,
         };
-
-        setLoading(true);
         await googleSheetService(data);
         const result = await formService(data);
         if (result.data.errCode === 0) {
