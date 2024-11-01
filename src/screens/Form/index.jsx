@@ -16,6 +16,7 @@ import googleSheetService from "../../service/googleSheet/googleSheet";
 
 import { Form, ButtonToolbar, Button } from "rsuite";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import DateTimeFormat from "./formatTime";
 
 export default function FormScreen() {
   //State
@@ -109,7 +110,16 @@ export default function FormScreen() {
           location: updateInfo.location,
           imageUrl: updateInfo.imageUrl,
         };
-        await googleSheetService(data);
+        const dataSheet = {
+          name: data.fullName,
+          studentCode: data.studentCode,
+          code: data.code,
+          location: data.location,
+          imageUrl: data.imageUrl,
+          submittedTime: DateTimeFormat(),
+        };
+        console.log(dataSheet.submittedTime);
+        await googleSheetService(dataSheet);
         const result = await formService(data);
         if (result.data.errCode === 0) {
           setInfoUser({
