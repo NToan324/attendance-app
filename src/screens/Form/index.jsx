@@ -111,14 +111,13 @@ export default function FormScreen() {
           imageUrl: updateInfo.imageUrl,
         };
         const dataSheet = {
-          name: data.fullName,
-          studentCode: data.studentCode,
-          code: data.code,
-          location: data.location,
-          imageUrl: data.imageUrl,
+          name: updateInfo.fullName,
+          studentCode: updateInfo.studentCode,
+          code: updateInfo.code,
+          location: updateInfo.location,
+          imageUrl: updateInfo.imageUrl,
           submittedTime: DateTimeFormat(),
         };
-        console.log(dataSheet.submittedTime);
         await googleSheetService(dataSheet);
         const result = await formService(data);
         if (result.data.errCode === 0) {
