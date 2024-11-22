@@ -3,7 +3,7 @@ const googleSheet = (data) => {
   console.log("gg shet", data);
   return axios
     .post(
-      "https://api.sheetbest.com/sheets/247a8cf9-4f51-494c-baac-eabdad76ad69",
+      "https://api.sheetbest.com/sheets/4798fe80-dbd3-4ea6-a66d-a5978dfafa5e",
       {
         fullName: data.name,
         studentCode: data.studentCode,
